@@ -1,6 +1,20 @@
 const express=require("express")
 const app=express()
 
+
+const bodyParser=require("body-parser")
+app.use(bodyParser.urlencoded());
+
+
+app.post('/page',(req,res)=>{
+    console.log("body data",req.body)
+    // res.send("get request body parser")
+    res.send(req.body)
+    res.write(req.body)
+})
+
+
+
 app.get("/",(req,res)=>{
     // console.log("home")
     res.send(`
@@ -23,8 +37,10 @@ app.get("/about",(req,res)=>{
 
 app.delete("/delete",(req,res)=>{
     // console.log("delete route")
-    res.send("the delete route").status(400)
+    res.send("the delete route").status
 })
  
+
+
  
 app.listen(4000)
