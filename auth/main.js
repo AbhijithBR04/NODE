@@ -19,6 +19,25 @@ const UserSchema = new mongoose.Schema({
 app.use(bodyParser.urlencoded());
 const User = mongoose.model("User", UserSchema);
 
+
+const authmiddleware = async function(req, res, next) {
+  const token = req.body.token;
+  try {
+    const decodedToken = jwt.verify(token, jwtSecret);
+    const userData = await User.findById(decodedToken.id);
+
+    if (!userData) {
+      res.status(404).json({ message: "User not found" });
+    } else {
+      res.status(200).json({ message: "Verification successful", user: userData });
+    }
+  } catch (error) {
+    res.status(401).json({ message: "Token is invalid or expired" });
+  }
+  next();
+};
+
+
 // app.post("/login-post", (req, res) => {
 //   userData = new User();
 //   bcrypt.hash(req.body.password, 10).then(async (hash) => {
@@ -78,7 +97,7 @@ app.post("/login-post", async (req, res) => {
 //     }
 // })
 
-app.post("/logged-post", async (req, res) => {
+app.post("/logged-post",async (req, res) => {
   const { name, password } = req.body;
   if (!name || !password) {
     return res.send("not found");
@@ -93,7 +112,7 @@ app.post("/logged-post", async (req, res) => {
         const maxAge=3*60*60;
         const token=jwt.sign({ id: user._id,name, role: user.role },
             jwtSecret,{expiresIn: maxAge,})
-      res.status(200).json({token});
+      res.status(200).json({token,user:user._id,name:user.name});
     } else {
       res.status(400).json({ message: "Failed" });
     }
@@ -101,6 +120,28 @@ app.post("/logged-post", async (req, res) => {
     res.status(400).json({ message: "error occurred" });
   }
 });
+
+
+app.post("/verify", async (req, res) => {
+  const token = req.body.token;
+  try {
+    const decodedToken = jwt.verify(token, jwtSecret);
+    const userData = await User.findById(decodedToken.id);
+
+    if (!userData) {
+      res.status(404).json({ message: "User not found" });
+    } else {
+      res.status(200).json({ message: "Verification successful", user: userData });
+    }
+  } catch (error) {
+    res.status(401).json({ message: "Token is invalid or expired" });
+  }
+});
+
+// app.get("/protected", authmiddleware, (req, res) => {
+//   res.json({ message: "Access granted", user: req.user });
+// });
+
 
 app.listen(5000, () => {
   console.log("port running");
