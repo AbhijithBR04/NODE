@@ -19,6 +19,6 @@ app.use(express.urlencoded({extended:false}))
 app.use('/',require('./routes/authRouting'))
 
 
-app.listen(8000,()=>{
+app.listen(4000,()=>{
     console.log("server running")
 })

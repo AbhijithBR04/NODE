@@ -1,12 +1,21 @@
 const bcrypt=require("bcrypt")
+const Joi = require('joi')
 const User=require('../models/user') ///data from models schema and things
 const jwt=require("jsonwebtoken")
 
-const JWT_SECRET= "figfifsfiiuoefueuiruw4y387"
+const JWT_SECRET= "figfifsfiiuoefueuiruw4y387gewwg"
 
 const test = (req, res) => {
     res.json("fine");
 };
+
+const registerSchema=Joi.object(
+    {
+        Name:Joi.string().required(),
+        Email:Joi.string().email().required(),
+        Password:Joi.string().required(),
+    }
+)
 
 async function hash(password){
     return await bcrypt.hash(password,10)
@@ -73,6 +82,7 @@ const loginUser= async(req,res)=>{
 
 module.exports = {
     test,
+    registerSchema,
     registerUser,
     loginUser
 };
