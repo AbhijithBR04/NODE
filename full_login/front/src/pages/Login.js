@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 
 
 
+
 export default function Login() {
   const navigate=useNavigate();
     const [data,setData]=useState({
@@ -31,6 +32,9 @@ export default function Login() {
       console.log(error)
     }
   }
+  const updatetbn=()=>{
+    navigate('/update')
+  }
   
     return (
     <div className='login'>
@@ -39,6 +43,7 @@ export default function Login() {
             <input type="password" placeholder='Enter your Password...'  value={data.password} onChange={(e)=>setData({...data,password:e.target.value})} />
             <button type='submit'>Login</button>
         </form>
+       <button onClick={updatetbn}>click to update name</button>
     </div>
   )
 }

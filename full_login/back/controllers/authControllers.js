@@ -1,21 +1,13 @@
 const bcrypt=require("bcrypt")
-const Joi = require('joi')
 const User=require('../models/user') ///data from models schema and things
 const jwt=require("jsonwebtoken")
-
 const JWT_SECRET= "figfifsfiiuoefueuiruw4y387gewwg"
 
 const test = (req, res) => {
     res.json("fine");
 };
 
-const registerSchema=Joi.object(
-    {
-        Name:Joi.string().required(),
-        Email:Joi.string().email().required(),
-        Password:Joi.string().required(),
-    }
-)
+
 
 async function hash(password){
     return await bcrypt.hash(password,10)
@@ -36,7 +28,7 @@ const registerUser= async(req,res)=>{
             }
             if(!password || password.length<6){
                 return res.json({
-                    error:"Password is required and should be atleast 6 characters"
+                    error:"Password required and should be atleast 6 characters"
                 })
             }
             const exist =await User.findOne({email}) //check email is already given
@@ -69,7 +61,7 @@ const loginUser= async(req,res)=>{
            if(match){
             jwt.sign({email:user.email,id:user._id,name:user.name},JWT_SECRET,{},(err,token)=>{
                 if(err) throw(err);
-                res.cookie("token",token).json(user)
+                res.cookie("token",token).json({user,token})
             })
            }
            if(!match){
@@ -80,9 +72,26 @@ const loginUser= async(req,res)=>{
         }
 }
 
+
+const updateUser =async(req,res)=>{
+
+    const {name,id}=req.body
+     const user=  await User.findById(id)
+     if (user){
+        user.name=name
+        await user.save()
+        res.status(200).json({message:"The name is updated"})
+     }
+     else {
+        res.status(404).json("user not found")
+     }
+}
+
+
+
 module.exports = {
     test,
-    registerSchema,
     registerUser,
-    loginUser
+    loginUser,
+    updateUser
 };

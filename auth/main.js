@@ -1,4 +1,6 @@
 const express = require("express");
+const multer  = require('multer')
+
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const bcrypt = require("bcryptjs");
@@ -10,14 +12,28 @@ mongoose
   .connect("mongodb://127.0.0.1:27017/authDB")
   .then(() => console.log("DataBase Connected"));
 
+
 const UserSchema = new mongoose.Schema({
   name: { type: String, required: true },
   password: { type: String, minlength: 6, required: true },
   role: { type: String, required: true },
+  image:{ type: String},
 });
 
 app.use(bodyParser.urlencoded());
 const User = mongoose.model("User", UserSchema);
+
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null,'uploads')
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname)
+  }
+})
+
+const upload = multer({ storage: storage }) //const upload = multer('uploads/') will only store a converted value ,storage is used to store the exact file
 
 
 const authmiddleware = async function(req, res, next) {
@@ -58,14 +74,15 @@ const authmiddleware = async function(req, res, next) {
 // });
 
 
-app.post("/login-post", async (req, res) => {
+app.post("/login-post",upload.single ('image'),async (req, res) => {           //formdata storing in database,use upload.single for file upload
     try {
       const userData = new User();
       const hash = await bcrypt.hash(req.body.password, 10);
-  
+      console.log(req.file);
       userData.name = req.body.name;
       userData.password = hash;
       userData.role = req.body.role;
+      userData.image=req.file.path  //image is the formdata key or the user model key ... file.path is the loaction of the image on uploads folder
   
       const savedData = await userData.save();
       console.log("data", savedData);
@@ -146,3 +163,8 @@ app.post("/verify", async (req, res) => {
 app.listen(5000, () => {
   console.log("port running");
 });
+
+
+
+
+
