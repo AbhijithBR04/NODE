@@ -2,18 +2,26 @@ const express = require("express");
 const router = express.Router();
 const Task = require("./model");
 
+//to get all the data
 router.get("/todos", async (req, res) => {
   const tasks = await Task.findAll();
 
   res.status(200).json(tasks);
 });
 
+
+//to create a todo data
 router.post("/todos", async (req, res) => {
   const { content, description } = req.body;
+  const existingTask = await Task.findOne({ where:{content:content} });
 
+  if (existingTask) {
+    // Task with the same content already exists
+    return res.status(400).json({ message: "Task with the same content already exists" });
+  }
   const newTask = Task.build({
-    'content': content,
-    'description': description,
+    content: content,
+    description: description,
   });
 
   try {
@@ -25,6 +33,8 @@ router.post("/todos", async (req, res) => {
   }
 });
 
+
+//to get a data of an specific one with the help of id passing as a parameter
 router.get("/todo/:id", async (req, res) => {
   const task = await Task.findOne({
     where: {
@@ -35,6 +45,8 @@ router.get("/todo/:id", async (req, res) => {
   res.status(200).json(task);
 });
 
+
+//to update the is_complete true of false value
 router.patch("/todo/:id", async (req, res) => {
   const task = await Task.findOne({
     where: {
@@ -49,10 +61,11 @@ router.patch("/todo/:id", async (req, res) => {
   });
 
   await task.save();
-
   res.status(200).json(task);
 });
 
+
+//to update the entire todo data with the the help of id passing as a parameter
 router.put("/todo/:id", async (req, res) => {
   const task = await Task.findOne({
     where: {
@@ -73,6 +86,8 @@ router.put("/todo/:id", async (req, res) => {
   res.status(200).json(task);
 });
 
+
+//to delete the todo data with the help of id passing as a parameter
 router.delete("/todo/:id", async (req, res) => {
   const task = await Task.findOne({
     where: {
@@ -82,7 +97,7 @@ router.delete("/todo/:id", async (req, res) => {
 
   await task.destroy();
 
-  res.status(204).json({});
+  res.status(204).json({message:"user deleted"});
 });
 
 module.exports = router;
